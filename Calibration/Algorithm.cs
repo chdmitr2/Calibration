@@ -128,15 +128,15 @@ namespace Calibration
 
             //Console.WriteLine("          " + buffer_subband + "             " + buffer_frequency + "      " + buffer_words + "      " + buffer_rejection + "            " + buffer_bandwidth);
 
-            int[] friquencies = Enumerable.Range(225, 288).ToArray();
-            Console.WriteLine(" LNA1 SubBand      Frequency[MHz]  BinaryWord   Rejection[dB]   Gain Variation ");
+            int[] friquencies = Enumerable.Range(225,288).ToArray();
+            Console.WriteLine(" LNA1 SubBand      Frequency[MHz]  BinaryWord   Rejection[dB]   Gain Variation[%] ");
             foreach (int freq in friquencies)
             {
                 int row = 2;
                 int index = 0;
                 
                 //Console.WriteLine("\n");
-                //WriteLine(" Frequency " + freq + " MHz :\n");
+                //Console.WriteLine(" Frequency " + freq + " MHz :\n");
                 foreach (double fr in frequency)
                 {
                     if (fr > freq - 1 && fr < freq + 1 && rejection[index] >= 20.5 && bandwidth[index] < 12)
@@ -151,7 +151,7 @@ namespace Calibration
                 }
                 if (Temp_TunedFrequency.Count != 0)
                 {
-                        int minIndex = IndexOfMin(Temp_BandWidth);
+                        int minIndex = IndexOfMin(Temp_BandWidth, Temp_NotchRejection);
                         Output_TunedFrequency.Add(Temp_TunedFrequency[minIndex]);
                         Output_SubBand.Add(Temp_SubBand[minIndex]);
                         Output_BinaryWord.Add(Temp_BinaryWord[minIndex]);
@@ -214,28 +214,42 @@ namespace Calibration
             excelBest.Close();
         }
 
-        public static int IndexOfMin (List<double> list)
+        public static int IndexOfMin (List<double> bandwidth, List<double> rejection)
         {
-            double min = list[0];
+            double min = bandwidth[0];
             int minIndex = 0;
 
-            for (int i = 1; i < list.Count; ++i)
+            for (int i = 1; i < bandwidth.Count; ++i)
             {
-                if(list [i] < min)
+                if(rejection[i] > 24 && rejection[i] < 26)
                 {
-                    min = list[i];
                     minIndex = i;
-                }    
+                    break;
+                }
+                else if (rejection[i] > 23 && rejection[i] < 27)
+                {
+                    minIndex = i;
+                    break;
+                }
+                else if (rejection[i] > 22 && rejection[i] < 28)
+                {
+                    minIndex = i;
+                    break;
+                }
+                else if (bandwidth[i] < min)
+                {
+                    min = bandwidth[i];
+                    minIndex = i;
+                }
             }
 
             return minIndex;
-
         }
         public void printTable(List<int> subband, List<double> frequency, List<int> words, List<double> rejection, List<double> bandwidth)
         {
             int count = subband.Count();
             int[] friquencies = Enumerable.Range(0, count).ToArray();
-           // Console.WriteLine(" LNA1 SubBand      Frequency[MHz]  BinaryWord   Rejection[dB]   Gain Variation ");
+            //Console.WriteLine(" LNA1 SubBand      Frequency[MHz]  BinaryWord   Rejection[dB]   Gain Variation ");
             foreach(int freq in friquencies)
             {
                 Console.WriteLine("          " + subband[freq] + "             " + frequency[freq] + "      " + words[freq] + "      " + rejection[freq] + "            " + bandwidth[freq] );
