@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Office.Interop.Excel;
+using System.Runtime.InteropServices;
 using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace Calibration
@@ -23,7 +24,7 @@ namespace Calibration
 
         public string ReadCell(int i,int j)
         {
-            i++;
+       
             if (ws.Cells[i, j].Value2 != null)
                 return Convert.ToString(ws.Cells[i, j].Value2);
             else
@@ -31,15 +32,20 @@ namespace Calibration
         }
 
         public void WriteToCell(int i, int j,string s)
-        {
-            i++;
+        {  
+            
+            if(ws != null)
+            {
+                Marshal.ReleaseComObject(ws);
+                ws = null;
+            }
             ws.Cells[i, j].Value2 = s;          
         }
 
         public void Save()
         {
             wb.Save();
-        }
+       }
 
         public void SaveAs(string path)
         {
